@@ -1,0 +1,2 @@
+# Default install is CPU-only. Train/infer the LLMs using requirements-kaggle.txt on Kaggle.
+-r requirements-local.txt

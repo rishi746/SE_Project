@@ -1,0 +1,27 @@
+{
+  "llm1-report-adapter": {
+    "base_model": "Qwen/Qwen3-4B-Instruct-2507",
+    "base_revision": "cdbee75f17c01a7cc42f958dc650907174af0554",
+    "training_completed": true,
+    "training_status": "completed",
+    "run_tier": "pilot",
+    "global_step": 250,
+    "trained_epochs": 0.7293946024799417,
+    "adapter_sha256": "a3ce985800dd2bddd262b71fb193f0505ef7eeea66119bdb795e57d93bcaaec9"
+  },
+  "llm2-approved315-v1-adapter": {
+    "base_model": "Qwen/Qwen3-4B-Instruct-2507",
+    "base_revision": "cdbee75f17c01a7cc42f958dc650907174af0554",
+    "training_completed": true,
+    "training_status": "completed",
+    "run_tier": "full",
+    "global_step": 32,
+    "trained_epochs": 1.0,
+    "adapter_sha256": "e7b7525a1778a32fe97e3817a364ada4723f1ff1b65ef01dbbb9f96b0adcead2",
+    "training_examples": 252,
+    "heldout_examples": 63,
+    "approved_snapshot_sha256": "6cf3c6e643314a2fe3d49ac69cc27ebd754baa3e2da10a93edc982d182c8b3be",
+    "evaluation_status": "not_requested",
+    "quality_status": "reference choice and unsupported-fact checks failed; not accuracy validated"
+  }
+}

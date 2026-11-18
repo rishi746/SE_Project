@@ -1,0 +1,13 @@
+# Dependencies of the original requirement-only prototype (preserved for reference).
+# Do not install on the laptop for the new two-stage workflow.
+accelerate>=0.33.0
+bitsandbytes>=0.50.1
+chromadb>=0.5.5
+datasets>=2.20.0
+faiss-cpu>=1.8.0.post1
+peft>=0.12.0
+pydantic>=2.8.2
+sentence-transformers>=3.0.1
+torch>=2.3.1
+transformers>=4.43.0
+trl>=0.9.6

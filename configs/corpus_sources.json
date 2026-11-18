@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "purpose": "Licensed architecture reference corpus; these documents are not gold request/design or lifecycle-decision pairs.",
+  "sources": [
+    {"id":"kubernetes-keps","repo":"kubernetes/enhancements","ref":"master","license":"Apache-2.0","license_path":"LICENSE","license_marker":"Apache License","attribution":"The Kubernetes Authors and contributors","include":["keps/"],"extensions":[".md"],"role":"real_design_proposals","max_archive_mb":200},
+    {"id":"azure-architecture","repo":"MicrosoftDocs/architecture-center","ref":"main","license":"CC-BY-4.0","license_path":"LICENSE","license_marker":"Attribution 4.0","attribution":"Microsoft and contributors","include":["docs/"],"extensions":[".md"],"role":"architecture_reference","max_archive_mb":350},
+    {"id":"etcd-documentation","repo":"etcd-io/website","ref":"main","license":"CC-BY-4.0","license_path":"LICENSE","license_marker":"Attribution 4.0","attribution":"etcd Authors and contributors","include":["content/en/docs/v3.6/","content/en/docs/v3.7/","content/en/docs/learning/"],"extensions":[".md"],"role":"distributed_systems_reference","max_archive_mb":100},
+    {"id":"otel-specification","repo":"open-telemetry/opentelemetry-specification","ref":"main","license":"Apache-2.0","license_path":"LICENSE","license_marker":"Apache License","attribution":"The OpenTelemetry Authors and contributors","include":["specification/"],"extensions":[".md"],"role":"observability_reference","max_archive_mb":100},
+    {"id":"kubernetes-network-design","repo":"kubernetes/design-proposals-archive","ref":"main","license":"Apache-2.0","license_path":"LICENSE","license_marker":"Apache License","attribution":"The Kubernetes Authors and contributors","include":["network/","architecture/","api-machinery/","auth/"],"extensions":[".md"],"role":"historical_design_proposals","max_archive_mb":100}
+  ],
+  "reference_only": [
+    {"id":"nist-ssdf","url":"https://csrc.nist.gov/pubs/sp/800/218/final","reason":"Authoritative secure development practices integrated into any lifecycle; a lifecycle recommendation is not a NIST certification."},
+    {"id":"nasa-lifecycle","url":"https://ntrs.nasa.gov/citations/19980227761","reason":"NASA lifecycle-selection guidance; no universal best lifecycle."},
+    {"id":"ietf-rights","url":"https://trustee.ietf.org/license-info/","reason":"RFC prose has IETF Trust terms; code-component BSD rights do not automatically apply to prose. Not bulk-ingested."},
+    {"id":"promise-expanded","url":"https://github.com/AleksandarMitrevski/se-requirements-classification/blob/master/0-datasets/PROMISE_exp/PROMISE_exp.arff","license":"CC-BY-SA-3.0","reason":"969 short requirement-classification records; useful auxiliary benchmark, not design/SDLC gold pairs. Share-alike data kept out of this default corpus."}
+  ]
+}

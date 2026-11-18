@@ -1,0 +1,66 @@
+[
+  {
+    "source_id": "NIST-SP-800-94",
+    "title": "Guide to Intrusion Detection and Prevention Systems (IDPS)",
+    "publisher": "NIST",
+    "url": "https://csrc.nist.gov/pubs/sp/800/94/final",
+    "topics": ["ids", "intrusion_detection", "monitoring", "incident_response"],
+    "use_in_dataset": "Ground IDS detection, alerting, tuning, monitoring, and maintenance requirements."
+  },
+  {
+    "source_id": "NIST-SP-800-41R1",
+    "title": "Guidelines on Firewalls and Firewall Policy",
+    "publisher": "NIST",
+    "url": "https://csrc.nist.gov/pubs/sp/800/41/r1/final",
+    "topics": ["firewall", "access_control", "policy_management"],
+    "use_in_dataset": "Ground firewall rule lifecycle, policy validation, testing, deployment, and audit requirements."
+  },
+  {
+    "source_id": "NIST-SP-800-77R1",
+    "title": "Guide to IPsec VPNs",
+    "publisher": "NIST",
+    "url": "https://csrc.nist.gov/pubs/sp/800/77/r1/final",
+    "topics": ["vpn", "ipsec", "ike", "encryption", "remote_access"],
+    "use_in_dataset": "Ground VPN authentication, encryption, key management, tunnel policy, and monitoring requirements."
+  },
+  {
+    "source_id": "NIST-SP-800-61R2",
+    "title": "Computer Security Incident Handling Guide",
+    "publisher": "NIST",
+    "url": "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-61r2.pdf",
+    "topics": ["incident_response", "ddos", "security_operations"],
+    "use_in_dataset": "Ground alert escalation, response workflow, containment, recovery, and post-incident evidence requirements."
+  },
+  {
+    "source_id": "CISA-DDOS-GUIDE",
+    "title": "Understanding and Responding to Distributed Denial-of-Service Attacks",
+    "publisher": "CISA",
+    "url": "https://www.cisa.gov/resources-tools/resources/understanding-and-responding-distributed-denial-service-attacks",
+    "topics": ["ddos", "availability", "mitigation", "response"],
+    "use_in_dataset": "Ground DDoS detection, traffic filtering, escalation, resilience, and mitigation requirements."
+  },
+  {
+    "source_id": "RFC-5424",
+    "title": "The Syslog Protocol",
+    "publisher": "IETF",
+    "url": "https://www.rfc-editor.org/rfc/rfc5424",
+    "topics": ["logging", "syslog", "network_monitoring", "audit"],
+    "use_in_dataset": "Ground log format, structured event data, timestamp, origin, relay, and collector requirements."
+  },
+  {
+    "source_id": "RFC-6241",
+    "title": "Network Configuration Protocol (NETCONF)",
+    "publisher": "IETF",
+    "url": "https://www.rfc-editor.org/rfc/rfc6241",
+    "topics": ["router_switch_config", "netconf", "configuration_management"],
+    "use_in_dataset": "Ground network device configuration, validation, rollback, locking, and change management requirements."
+  },
+  {
+    "source_id": "RFC-3411",
+    "title": "Architecture for Describing SNMP Management Frameworks",
+    "publisher": "IETF",
+    "url": "https://www.rfc-editor.org/rfc/rfc3411",
+    "topics": ["snmp", "network_monitoring", "device_management"],
+    "use_in_dataset": "Ground device monitoring, management data, polling, notifications, and operational telemetry requirements."
+  }
+]
