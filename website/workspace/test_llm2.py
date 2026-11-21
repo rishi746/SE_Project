@@ -17,8 +17,8 @@ class LLM2WebsiteTests(TestCase):
         self.client.force_login(self.user)
 
     def test_separate_site_and_login_required(self):
-        self.assertContains(self.client.get('/', SERVER_PORT='8001'), 'Choose a lifecycle.')
-        self.assertContains(self.client.get('/', SERVER_PORT='8000'), 'Good software starts')
+        self.assertContains(self.client.get('/', SERVER_PORT='8001'), 'SDLC studio')
+        self.assertContains(self.client.get('/', SERVER_PORT='8000'), 'SRS studio')
         anonymous = Client()
         for endpoint in ('', 'upload/', 'chat/', 'report/', 'download/', 'new/'):
             self.assertEqual(anonymous.get('/llm2/' + endpoint).status_code, 302)

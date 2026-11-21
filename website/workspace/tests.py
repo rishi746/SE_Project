@@ -10,10 +10,11 @@ class WebsiteTests(TestCase):
         self.user = get_user_model().objects.create_user('analyst', 'analyst@example.com', 'A-strong-password-784!')
 
     def test_authentication_and_csrf_boundaries(self):
-        for url in ['/', '/chat/', '/report/', '/download/', '/progress/']:
+        self.assertContains(self.client.get('/'), 'Sign in to open your workspace.')
+        for url in ['/chat/', '/report/', '/download/', '/progress/']:
             self.assertEqual(self.client.get(url).status_code, 302)
         self.client.force_login(self.user)
-        self.assertContains(self.client.get('/'), 'Generate SRS Word document')
+        self.assertContains(self.client.get('/'), 'Generate SRS')
         secure = Client(enforce_csrf_checks=True)
         secure.force_login(self.user)
         self.assertEqual(secure.post('/chat/', {'message': 'hello'}).status_code, 403)

@@ -40,3 +40,9 @@ FILE_UPLOAD_MAX_MEMORY_SIZE = 1024 * 1024
 LLM1_URL = os.environ.get('LLM1_URL', '')
 LLM1_TOKEN = os.environ.get('LLM1_TOKEN')
 SMS_INFERENCE = os.environ.get('SMS_INFERENCE', 'local')
+
+IDLE_TIMEOUT_SECONDS = 20 * 60
+IDLE_WARNING_SECONDS = 60
+MIDDLEWARE = ['workspace.idle.SafeSessionMiddleware' if item == 'django.contrib.sessions.middleware.SessionMiddleware' else item for item in MIDDLEWARE]
+MIDDLEWARE.insert(MIDDLEWARE.index('django.contrib.auth.middleware.AuthenticationMiddleware') + 1, 'workspace.idle.IdleMiddleware')
+ACCOUNT_LOGOUT_REDIRECT_URL = '/'

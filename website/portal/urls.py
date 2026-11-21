@@ -16,9 +16,10 @@ Including another URLconf
 """
 from django.urls import include, path
 from workspace import views
-from workspace import llm2_views
+from workspace import llm2_views, idle
 
 urlpatterns = [
+    path('session/status/', idle.status), path('session/activity/', idle.activity),
     path('accounts/', include('allauth.urls')),
     path('', views.home), path('chat/', views.chat), path('report/', views.report),
     path('new/', views.new_chat), path('download/', views.download), path('progress/', views.progress),

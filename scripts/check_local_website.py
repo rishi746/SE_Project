@@ -29,7 +29,7 @@ try:
     http.cookies.set('sessionid', session.session_key)
     page = http.get('http://127.0.0.1:8000/', timeout=20)
     page.raise_for_status()
-    assert 'Local GPU model' in page.text
+    assert 'Generate SRS' in page.text
     csrf = re.search(r'name="csrfmiddlewaretoken" value="([^"]+)"', page.text)[1]
     headers = {'X-CSRFToken': csrf, 'Referer': 'http://127.0.0.1:8000/'}
     answer = http.post('http://127.0.0.1:8000/chat/', headers=headers,

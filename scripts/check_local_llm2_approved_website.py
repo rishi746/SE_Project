@@ -52,7 +52,7 @@ try:
     http.cookies.set('sessionid', session.session_key)
     response = http.get('http://127.0.0.1:8001/', timeout=20)
     response.raise_for_status()
-    assert 'Choose a lifecycle.' in response.text
+    assert 'SDLC studio' in response.text
     assert 'Optional project context' in response.text
     assert 'Your message' not in response.text and 'clarif' not in response.text.lower()
     csrf = re.search(r'name="csrfmiddlewaretoken" value="([^"]+)"', response.text)[1]

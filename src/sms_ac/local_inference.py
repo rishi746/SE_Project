@@ -15,7 +15,7 @@ from uuid import uuid4
 
 from .documents import markdown_to_docx
 from .prompts import CLARIFICATION_SYSTEM_PROMPT
-from .srs import SRS_INSTRUCTIONS, SRS_SECTIONS, section_body
+from .srs import SRS_INSTRUCTIONS, SRS_SECTIONS, section_body, section_index
 
 ROOT = Path(__file__).resolve().parents[2]
 logger = logging.getLogger(__name__)
@@ -111,8 +111,7 @@ class LocalEngine:
             raise ValueError('Discuss your project before generating the SRS.')
         with self.lock:
             started = time.monotonic()
-            parts = ['# Software Requirements Specification',
-                'IEEE 830 structured draft based on the project discussion. Unconfirmed targets, assumptions and unresolved decisions require stakeholder review.']
+            parts = ['# Software Requirements Specification']
             # Keep the requirements already drafted available to traceability sections.
             requirements = ''
             for index, section in enumerate(SRS_SECTIONS, 1):
@@ -120,36 +119,27 @@ class LocalEngine:
                     progress(index, len(SRS_SECTIONS), section)
                 logger.info('SRS section %s/%s: %s', index, len(SRS_SECTIONS), section)
                 payload = {'section': section, 'discussion': history,
-                    'source': 'User clarification discussion; no external references supplied.',
                     'requirements_already_drafted': requirements}
-                if section == '1.4 References':
-                    text = ('The project clarification discussion is the source of confirmed application facts. '
-                        'IEEE 830-1998 is the requested document outline reference. No external technical '
-                        'source documents were supplied for this draft. Gateway API and identity-provider '
-                        'documentation are TBD and must be obtained and checked by the integration owner. '
-                        'No external control mapping or compliance claim has been verified.')
-                elif section == 'Index':
-                    text = 'Section index (page numbers depend on Word pagination):\n\n' + '\n'.join('- ' + s for s in SRS_SECTIONS[:-1])
-                else:
-                    text = self.generate([{'role': 'system', 'content': SRS_INSTRUCTIONS},
-                        {'role': 'user', 'content': json.dumps(payload, ensure_ascii=False)}],
-                        max_new_tokens=1800)
-                    text = section_body(section, text)
+                text = self.generate([{'role': 'system', 'content': SRS_INSTRUCTIONS},
+                    {'role': 'user', 'content': json.dumps(payload, ensure_ascii=False)}],
+                    max_new_tokens=1800)
+                text = section_body(section, text)
                 level = 2 if section.startswith(('Appendix', 'Index')) else min(4, 1 + len(section.split()[0].split('.')))
                 parts.append('#' * level + ' ' + section + '\n\n' + text)
-                if section.startswith(('3.2 ', '3.3 ', '3.6.2 ')):
+                if section.startswith(('3.2 ', '3.3 ', '3.6.')):
                     requirements += '\n' + text
             output = ROOT / 'outputs/local-srs' / uuid4().hex
             output.mkdir(parents=True)
+            parts.append('## Index\n\n' + section_index())
             md = '\n\n'.join(parts)
             (output / 'srs.md').write_text(md, encoding='utf-8')
             docx = markdown_to_docx(md, output / 'srs.docx', title='Networking Software Requirements Specification',
-                preserve_heading_numbers=True)
+                preserve_heading_numbers=True, include_toc=True)
             summary = {'sections': len(SRS_SECTIONS), 'characters': len(md),
                 'elapsed_seconds': round(time.monotonic() - started, 1), 'runtime': 'local GPU',
                 'adapter': 'llm1-report-adapter', 'visual_review': 'pending'}
             (output / 'summary.json').write_text(json.dumps(summary, indent=2), encoding='utf-8')
-            return str(docx), str(output / 'srs.md'), f"Generated {len(SRS_SECTIONS)} SRS sections locally. Review assumptions and proposed targets before use."
+            return str(docx), str(output / 'srs.md'), "SRS ready."
 
 
 def get_engine():

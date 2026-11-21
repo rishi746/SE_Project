@@ -43,7 +43,7 @@ try:
     http.cookies.set('sessionid', session.session_key)
     response = http.get('http://127.0.0.1:8001/', timeout=20)
     response.raise_for_status()
-    assert 'Choose a lifecycle.' in response.text
+    assert 'SDLC studio' in response.text
     csrf = re.search(r'name="csrfmiddlewaretoken" value="([^"]+)"', response.text)[1]
     headers = {'X-CSRFToken': csrf, 'Referer': 'http://127.0.0.1:8001/'}
     with source.open('rb') as file:

@@ -33,21 +33,22 @@ def remote(request):
             locks[key] = threading.Lock()
     return clients[key], locks[key]
 
-@login_required
 def home(request):
+    if not request.user.is_authenticated:
+        return render(request, 'home.html')
     if request.get_port() == '8001':
         from .llm2_views import home as llm2_home
         return llm2_home(request)
     return render(request, 'workspace.html', {'history': request.session.get('conversation', []),
         'local': settings.SMS_INFERENCE == 'local', 'online': bool(settings.LLM1_URL),
-        'report_ready': bool(request.session.get('report_path'))})
+        'draft': request.session.get('llm1_draft', ''), 'report_ready': bool(request.session.get('report_path'))})
 
 @login_required
 @require_POST
 def chat(request):
     message = request.POST.get('message', '').strip()
     if not message or len(message) > 10000:
-        return JsonResponse({'error': 'Enter a message of 1–10,000 characters.'}, status=400)
+        return JsonResponse({'error': 'Enter a message of 1â€“10,000 characters.'}, status=400)
     history = request.session.get('conversation', [])
     if sum(len(t['content']) for t in history) + len(message) > 60000:
         return JsonResponse({'error': 'This discussion is full. Generate your SRS or start a new chat.'}, status=400)
@@ -63,6 +64,7 @@ def chat(request):
             raise ValueError('Empty model reply')
         history += [{'role': 'user', 'content': message}, {'role': 'assistant', 'content': result}]
         request.session['conversation'] = history
+        request.session['llm1_draft'] = ''
         request.session.pop('report_path', None)
         return JsonResponse({'reply': result})
     except ValueError as error:
@@ -94,6 +96,7 @@ def report(request):
         request.session['report_path'] = str(path)
         return JsonResponse({'download': '/download/', 'status': result[2]})
     except ValueError as error:
+        logger.warning('SRS generation rejected: %s', error)
         return JsonResponse({'error': str(error)}, status=400)
     except Exception:
         logger.exception('SRS generation failed')
@@ -113,5 +116,6 @@ def download(request):
 @require_POST
 def new_chat(request):
     request.session.pop('conversation', None)
+    request.session.pop('llm1_draft', None)
     request.session.pop('report_path', None)
     return JsonResponse({'ok': True})

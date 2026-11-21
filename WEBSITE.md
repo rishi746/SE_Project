@@ -36,3 +36,11 @@ The output is an IEEE 830-1998 structured **draft**, not an assertion of certifi
 .\.venv\Scripts\python.exe website/manage.py test workspace
 .\.venv\Scripts\python.exe website/manage.py check
 ```
+
+## Local themes and idle sessions
+
+Both studios and authentication pages have a light/dark toggle with browser-local preference and initial system preference. Idle timeout is 20 minutes, with a warning at 19 minutes. Server checks use a separate activity record; progress polls do not keep the session alive. The public `/` home page is the logout destination.
+
+The `workspace` database migration adds per-account saved workspace state and per-session idle timestamps. The launcher applies migrations at startup. Existing session-only project fields are imported on the next authenticated request. Saved context, uploaded-file references, drafts and report links can be recovered by the same account after logout. Model calls remain synchronous: if an already-started call finishes after its session is deleted, its result is saved by account and the old response does not restore login. This does not protect running generation against server shutdown, process termination or hardware failure. Refresh after signing back in to see a newly completed report.
+
+`website/manage.py test workspace` covers expiry, warning timing, renewal, polling, CSRF, user isolation, draft restoration and late report completion for both studios. Live browser checks used only a disposable account with its clock advanced for testing.

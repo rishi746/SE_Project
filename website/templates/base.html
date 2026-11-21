@@ -1,4 +1,179 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>SMS AC · {% if llm2_site %}Lifecycle Studio{% else %}Requirements Studio{% endif %}</title><style>
-:root{font-family:Inter,Segoe UI,sans-serif;color:#18312c;background:#f3f5ef}*{box-sizing:border-box}body{margin:0}a{color:#236d59}header{height:76px;border-bottom:1px solid #dce3d9;padding:0 5vw;display:flex;align-items:center;justify-content:space-between;background:#fbfcf8}.brand{font-weight:800;letter-spacing:-1px;font-size:24px}.brand span{color:#68917c;font-weight:400}main{max-width:1160px;margin:42px auto;padding:0 24px}.eyebrow{font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#62836c}h1{font-size:42px;line-height:1.15;letter-spacing:-1.5px}p{line-height:1.6;color:#587067}.card{background:#fff;border:1px solid #dce3d9;border-radius:18px;padding:28px;box-shadow:0 10px 32px #203d2810}.auth{max-width:470px;margin:65px auto}.auth h1{font-size:32px}label{display:block;font-size:14px;margin:14px 0 6px}input,textarea{font:inherit;padding:12px;border:1px solid #c8d5cc;border-radius:8px;width:100%;background:#fafbf8}button,.button{font:inherit;cursor:pointer;background:#225d48;color:white;border:0;border-radius:9px;padding:12px 18px;text-decoration:none;display:inline-block}button:disabled{opacity:.5;cursor:wait}.secondary{background:#e5ece4;color:#244e3d}.errorlist,.error{color:#aa342b}.helptext{font-size:12px;color:#6f7b71}.grid{display:grid;grid-template-columns:260px 1fr;gap:24px}.side h3{margin-top:0}.step{padding:16px 0;border-bottom:1px solid #e7ece4;font-size:14px}.badge{font-size:12px;padding:6px 10px;border-radius:20px;background:#e5ece4}.chat{height:420px;overflow:auto;padding:12px 0;white-space:pre-wrap}.turn{padding:16px 20px;border-radius:12px;background:#f0f4ed;margin:12px 0;max-width:95%;line-height:1.6}.user{background:#e0eee5;margin-left:40px}.role{display:block;font-size:11px;font-weight:700;letter-spacing:1px;margin-bottom:5px;text-transform:uppercase}.actions{display:flex;gap:10px;align-items:center;margin-top:12px}#status{min-height:24px;font-size:14px;color:#587067}form p{margin-bottom:14px}header form{display:inline}[hidden]{display:none!important}@media(max-width:720px){.grid{grid-template-columns:1fr}.side{display:none}h1{font-size:32px}main{margin-top:24px}.chat{height:390px}.brand{font-size:18px}.actions{flex-wrap:wrap}}
-input[type=checkbox]{width:auto;display:inline-block}
-</style></head><body><header><div class="brand">SMS AC <span>/ {% if llm2_site %}lifecycle studio{% else %}requirements studio{% endif %}</span></div><div>{% if user.is_authenticated %}{{ user.username }} <form method="post" action="{% url 'account_logout' %}">{% csrf_token %}<button class="secondary">Sign out</button></form>{% else %}<a href="{% url 'account_login' %}">Sign in</a>{% endif %}</div></header><main>{% if messages %}{% for message in messages %}<p>{{message}}</p>{% endfor %}{% endif %}{% block content %}{% endblock %}</main></body></html>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>SMS AC · {% if llm2_site %}Lifecycle Studio{% else %}Requirements Studio{% endif %}</title><script>
+(() => {
+  const key = 'sms-ac-theme';
+  const systemTheme = window.matchMedia('(prefers-color-scheme: dark)');
+  let preference = null;
+  try { preference = localStorage.getItem(key); } catch {}
+  if (!['light', 'dark'].includes(preference)) preference = null;
+  function applyTheme() {
+    const theme = preference || (systemTheme.matches ? 'dark' : 'light');
+    document.documentElement.dataset.theme = theme;
+    const toggle = document.getElementById('theme-toggle');
+    if (toggle) {
+      toggle.textContent = theme === 'dark' ? 'Light mode' : 'Dark mode';
+      toggle.setAttribute('aria-label', 'Switch to ' + (theme === 'dark' ? 'light' : 'dark') + ' mode');
+      toggle.setAttribute('aria-pressed', String(theme === 'dark'));
+    }
+  }
+  applyTheme();
+  document.addEventListener('DOMContentLoaded', () => {
+    applyTheme();
+    document.getElementById('theme-toggle').addEventListener('click', () => {
+      preference = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+      try { localStorage.setItem(key, preference); } catch {}
+      applyTheme();
+    });
+  });
+  systemTheme.addEventListener('change', () => { if (!preference) applyTheme(); });
+  window.addEventListener('storage', event => {
+    if (event.key === key || event.key === null) {
+      preference = ['light', 'dark'].includes(event.newValue) ? event.newValue : null;
+      applyTheme();
+    }
+  });
+})();
+</script>
+<style>
+:root {
+  font-family: Inter, Segoe UI, sans-serif;
+  color-scheme: light;
+  --page: #f3f5ef; --surface: #ffffff; --header: #fbfcf8; --field: #fafbf8;
+  --text: #18312c; --muted: #50675e; --help: #596a60; --link: #236d59;
+  --border: #dce3d9; --field-border: #82948a; --accent: #225d48; --accent-text: #ffffff;
+  --secondary: #e5ece4; --secondary-text: #244e3d; --bubble: #f0f4ed; --user: #e0eee5;
+  --error: #aa342b; --focus: #236d59; --shadow: #203d2810;
+  color: var(--text); background: var(--page);
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --page: #101917; --surface: #182521; --header: #14201c; --field: #101c18;
+  --text: #e5f0e9; --muted: #b3c8bd; --help: #a8bdb0; --link: #8bdfb8;
+  --border: #355044; --field-border: #658372; --accent: #a4e0bb; --accent-text: #10271a;
+  --secondary: #2a4136; --secondary-text: #e2f0e7; --bubble: #22362c; --user: #2c4c3b;
+  --error: #ffb4a8; --focus: #a4e0bb; --shadow: #00000030;
+}
+* { box-sizing: border-box; }
+body { margin: 0; }
+a { color: var(--link); }
+header { min-height: 76px; border-bottom: 1px solid var(--border); padding: 14px 5vw; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; background: var(--header); }
+.header-actions { display: flex; align-items: center; justify-content: flex-end; gap: 12px; flex-wrap: wrap; }
+.brand { font-weight: 800; letter-spacing: -1px; font-size: 24px; }
+.brand span { color: var(--muted); font-weight: 400; }
+main { max-width: 1160px; margin: 42px auto; padding: 0 24px; }
+.eyebrow { font-size: 12px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); }
+h1 { font-size: 42px; line-height: 1.15; letter-spacing: -1.5px; }
+p { line-height: 1.6; color: var(--muted); }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 18px; padding: 28px; box-shadow: 0 10px 32px var(--shadow); }
+.auth { max-width: 470px; margin: 65px auto; }
+.auth h1 { font-size: 32px; }
+label { display: block; font-size: 14px; margin: 14px 0 6px; }
+input, textarea { font: inherit; color: var(--text); padding: 12px; border: 1px solid var(--field-border); border-radius: 8px; width: 100%; background: var(--field); accent-color: var(--accent); }
+input::placeholder, textarea::placeholder { color: var(--help); opacity: 1; }
+button, .button { font: inherit; cursor: pointer; background: var(--accent); color: var(--accent-text); border: 0; border-radius: 9px; padding: 12px 18px; text-decoration: none; display: inline-block; }
+button:disabled { opacity: .5; cursor: wait; }
+.secondary { background: var(--secondary); color: var(--secondary-text); }
+:where(a, button, input, textarea, summary):focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+.errorlist, .error { color: var(--error); }
+.helptext { font-size: 12px; color: var(--help); }
+.grid { display: grid; grid-template-columns: 260px 1fr; gap: 24px; }
+.side h3 { margin-top: 0; }
+.step { padding: 16px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
+.badge { font-size: 12px; padding: 6px 10px; border-radius: 20px; background: var(--secondary); }
+.chat { height: 420px; overflow: auto; padding: 12px 0; white-space: pre-wrap; }
+.turn { padding: 16px 20px; border-radius: 12px; background: var(--bubble); margin: 12px 0; max-width: 95%; line-height: 1.6; }
+.user { background: var(--user); margin-left: 40px; }
+.role { display: block; font-size: 11px; font-weight: 700; letter-spacing: 1px; margin-bottom: 5px; text-transform: uppercase; }
+.actions { display: flex; gap: 10px; align-items: center; margin-top: 12px; }
+#status { min-height: 24px; font-size: 14px; color: var(--muted); }
+form p { margin-bottom: 14px; }
+header form { display: inline; }
+input[type=checkbox] { width: auto; display: inline-block; }
+dialog { color: var(--text); background: var(--surface); border: 1px solid var(--border); border-radius: 18px; max-width: 440px; width: calc(100% - 40px); padding: 28px; box-shadow: 0 16px 60px var(--shadow); }
+dialog::backdrop { background: #00000080; }
+[hidden] { display: none !important; }
+@media (max-width: 720px) {
+  .grid { grid-template-columns: 1fr; }
+  .side { display: none; }
+  h1 { font-size: 32px; }
+  main { margin-top: 24px; }
+  .chat { height: 390px; }
+  .brand { font-size: 18px; }
+  .actions { flex-wrap: wrap; }
+}
+</style></head><body><header><div class="brand">SMS AC <span>/ {% if llm2_site %}lifecycle studio{% else %}requirements studio{% endif %}</span></div><div class="header-actions"><button type="button" class="secondary" id="theme-toggle" aria-label="Switch to dark mode" aria-pressed="false">Dark mode</button>{% if user.is_authenticated %}{{ user.username }} <form method="post" action="{% url 'account_logout' %}">{% csrf_token %}<button class="secondary">Sign out</button></form>{% else %}<a href="{% url 'account_login' %}">Sign in</a>{% endif %}</div></header><main>{% if messages %}{% for message in messages %}<p>{{message}}</p>{% endfor %}{% endif %}{% block content %}{% endblock %}</main>{% if user.is_authenticated %}
+<dialog id="idle-warning" aria-labelledby="idle-title" aria-describedby="idle-description"><h2 id="idle-title">Still working?</h2><p id="idle-description">Session ends in <span id="idle-countdown">60</span> seconds. Your work is saved.</p><button type="button" id="idle-stay">Stay signed in</button><p id="idle-error" class="error" role="status"></p></dialog>
+<script>
+(() => {
+  const warning = document.getElementById('idle-warning');
+  const stay = document.getElementById('idle-stay');
+  const activityKey = 'sms-ac-activity-{{ user.pk }}';
+  let deadline = Infinity, warningSeconds = 60, pendingActivity = null, checking = false, leaving = false, activityBusy = false, activityQueued = false;
+  function leave() { if (!leaving) { leaving = true; window.location.assign('/'); } }
+  function closeWarning() { if (warning.open) warning.close(); }
+  async function sync(humanActivity = false) {
+    if (leaving) return;
+    if (humanActivity && activityBusy) { activityQueued = true; return; }
+    if (humanActivity) activityBusy = true;
+    if (!humanActivity && checking) return;
+    if (!humanActivity) checking = true;
+    try {
+      const options = { method: humanActivity ? 'POST' : 'GET', cache: 'no-store' };
+      if (humanActivity) {
+        options.headers = { 'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value };
+        const composer = document.getElementById('message');
+        options.body = new URLSearchParams(composer ? { draft: composer.value, studio: '{% if llm2_site %}llm2{% else %}llm1{% endif %}' } : {});
+      }
+      const response = await fetch(humanActivity ? '/session/activity/' : '/session/status/', options);
+      const result = await response.json();
+      if (response.status === 401 || result.expired) { leave(); return; }
+      if (!response.ok) throw Error('Session check failed');
+      deadline = Date.now() + result.remaining_seconds * 1000;
+      warningSeconds = result.warning_remaining_seconds;
+      document.getElementById('idle-error').textContent = '';
+      if (humanActivity) {
+        closeWarning();
+        try { localStorage.setItem(activityKey, String(Date.now())); } catch {}
+      }
+      tick();
+    } catch {
+      if (Date.now() >= deadline) leave();
+      else document.getElementById('idle-error').textContent = 'Could not confirm your session. Check the connection and try again.';
+    } finally {
+      if (!humanActivity) checking = false;
+      else {
+        activityBusy = false;
+        if (activityQueued && !leaving) { activityQueued = false; setTimeout(() => sync(true), 1000); }
+      }
+    }
+  }
+  function tick() {
+    if (leaving) return;
+    const seconds = Math.ceil((deadline - Date.now()) / 1000);
+    if (seconds <= 0) { sync(); return; }
+    if (seconds <= warningSeconds) {
+      document.getElementById('idle-countdown').textContent = seconds;
+      if (!warning.open) warning.showModal();
+    } else closeWarning();
+  }
+  function noteActivity(event) {
+    if (!event.isTrusted || leaving) return;
+    if (deadline - Date.now() < 60000) {
+      if (pendingActivity) clearTimeout(pendingActivity);
+      pendingActivity = null;
+      sync(true);
+    } else if (!pendingActivity) {
+      pendingActivity = setTimeout(() => { pendingActivity = null; sync(true); }, 1000);
+    }
+  }
+  for (const type of ['pointermove', 'pointerdown', 'keydown', 'touchstart', 'wheel', 'input'])
+    document.addEventListener(type, noteActivity, { passive: true });
+  stay.addEventListener('click', () => sync(true));
+  warning.addEventListener('cancel', event => { event.preventDefault(); sync(true); });
+  window.addEventListener('storage', event => { if (event.key === activityKey) sync(); });
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) sync(); });
+  setInterval(tick, 1000);
+  setInterval(() => sync(), 30000);
+  sync();
+})();
+</script>
+{% endif %}</body></html>

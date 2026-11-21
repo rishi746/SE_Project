@@ -21,7 +21,7 @@ ROOT = settings.BASE_DIR.parent / 'outputs/local-llm2'
 def home(request):
     return render(request, 'llm2.html', {'history': request.session.get('llm2_history', []),
         'source_name': request.session.get('llm2_source_name', ''),
-        'report_ready': bool(request.session.get('llm2_report'))})
+        'draft': request.session.get('llm2_draft', ''), 'report_ready': bool(request.session.get('llm2_report'))})
 
 
 def source(request):
@@ -47,6 +47,7 @@ def upload(request):
         request.session['llm2_source'] = str(path)
         request.session['llm2_source_name'] = Path(file.name).name
         request.session['llm2_history'] = []
+        request.session['llm2_draft'] = ''
         request.session.pop('llm2_report', None)
         return JsonResponse({'name': Path(file.name).name, 'characters': len(extracted.text),
             'warnings': list(extracted.warnings)})
@@ -59,7 +60,7 @@ def upload(request):
 def chat(request):
     message = request.POST.get('message', '').strip()
     if not message or len(message) > 10000:
-        return JsonResponse({'error': 'Enter a message of 1–10,000 characters.'}, status=400)
+        return JsonResponse({'error': 'Enter a message of 1â€“10,000 characters.'}, status=400)
     history = request.session.get('llm2_history', [])
     try:
         answer = discuss(LocalSDLCGenerator(), history, message, design_docx=source(request),
@@ -67,6 +68,7 @@ def chat(request):
         request.session['llm2_history'] = history + [{'role': 'user', 'content': message},
             {'role': 'assistant', 'content': answer}]
         request.session.pop('llm2_report', None)
+        request.session['llm2_draft'] = ''
         return JsonResponse({'reply': answer})
     except ValueError as error:
         return JsonResponse({'error': str(error)}, status=400)
@@ -109,6 +111,6 @@ def download(request):
 @login_required
 @require_POST
 def new(request):
-    for key in ('llm2_history', 'llm2_source', 'llm2_source_name', 'llm2_report'):
+    for key in ('llm2_history', 'llm2_source', 'llm2_source_name', 'llm2_report', 'llm2_draft'):
         request.session.pop(key, None)
     return JsonResponse({'ok': True})

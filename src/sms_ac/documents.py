@@ -155,7 +155,7 @@ def _add_inline(paragraph, text: str) -> None:
 
 def markdown_to_docx(markdown: str, destination: str | Path, *, title: str,
                      demo: bool = False, template: str | Path | None = None,
-                     preserve_heading_numbers: bool = False) -> Path:
+                     preserve_heading_numbers: bool = False, include_toc: bool = False) -> Path:
     """Export generated Markdown. Optional reference retains its style and page definitions.
 
     The exporter is text-oriented: fenced diagrams remain readable monospaced source rather
@@ -165,6 +165,7 @@ def markdown_to_docx(markdown: str, destination: str | Path, *, title: str,
     from docx.oxml import OxmlElement
     from docx.oxml.ns import qn
     from docx.shared import Inches, Pt, RGBColor
+    from docx.enum.text import WD_TAB_ALIGNMENT, WD_TAB_LEADER
 
     doc = Document(str(template)) if template else Document()
     if template:
@@ -183,7 +184,56 @@ def markdown_to_docx(markdown: str, destination: str | Path, *, title: str,
             doc.styles[name].font.color.rgb = RGBColor(0, 0, 0)
     doc.core_properties.author = "SMS AC"
     doc.core_properties.title = title
-    doc.add_paragraph(re.sub(r"[^\w\s]", " ", title).strip(), style="Title")
+    title_paragraph = doc.add_paragraph(re.sub(r"[^\w\s]", " ", title).strip(), style="Title")
+    if include_toc:
+        for properties in (doc.styles['Title'].element.find(qn('w:pPr')), title_paragraph._p.find(qn('w:pPr'))):
+            if properties is not None:
+                border = properties.find(qn('w:pBdr'))
+                if border is not None:
+                    properties.remove(border)
+        doc.styles['Title'].font.color.rgb = RGBColor(0, 0, 0)
+        contents = doc.add_paragraph('Table of Contents')
+        contents.runs[0].bold = True
+        contents.runs[0].font.size = Pt(16)
+        run = contents.add_run()
+        begin = OxmlElement('w:fldChar'); begin.set(qn('w:fldCharType'), 'begin')
+        instruction = OxmlElement('w:instrText'); instruction.set(qn('xml:space'), 'preserve')
+        instruction.text = ' TOC \\o "1-3" \\h \\z \\u '
+        separate = OxmlElement('w:fldChar'); separate.set(qn('w:fldCharType'), 'separate')
+        run._r.extend((begin, instruction, separate))
+        first_title = False
+        toc_headings = []
+        toc_in_code = False
+        for candidate in markdown.splitlines():
+            if candidate.startswith('```'):
+                toc_in_code = not toc_in_code
+                continue
+            if toc_in_code:
+                continue
+            match = re.match(r'^(#{1,6})\s+(.+)$', candidate)
+            if not match:
+                continue
+            if len(match[1]) == 1 and not first_title:
+                first_title = True
+                continue
+            toc_headings.append((min(max(len(match[1]) - 1, 1), 3), match[2]))
+        width = doc.sections[0].page_width - doc.sections[0].left_margin - doc.sections[0].right_margin
+        last = contents
+        for number, (level, label) in enumerate(toc_headings, 1):
+            paragraph = doc.add_paragraph()
+            paragraph.paragraph_format.left_indent = Inches(.18 * (level - 1))
+            paragraph.paragraph_format.space_after = Pt(2)
+            paragraph.paragraph_format.tab_stops.add_tab_stop(width, WD_TAB_ALIGNMENT.RIGHT, WD_TAB_LEADER.DOTS)
+            link = OxmlElement('w:hyperlink'); link.set(qn('w:anchor'), f'srs_{number}')
+            link_run = OxmlElement('w:r'); text_node = OxmlElement('w:t'); text_node.text = label
+            link_run.append(text_node); link.append(link_run); paragraph._p.append(link)
+            paragraph.add_run('\t')
+            field = OxmlElement('w:fldSimple'); field.set(qn('w:instr'), f' PAGEREF srs_{number} \\h ')
+            paragraph._p.append(field)
+            last = paragraph
+        end = OxmlElement('w:fldChar'); end.set(qn('w:fldCharType'), 'end'); last.add_run()._r.append(end)
+        update = OxmlElement('w:updateFields'); update.set(qn('w:val'), 'true'); doc.settings.element.append(update)
+    heading_number = 0
     if demo:
         p = doc.add_paragraph()
         p.add_run("DEMONSTRATION FIXTURE ").bold = True
@@ -208,10 +258,18 @@ def markdown_to_docx(markdown: str, destination: str | Path, *, title: str,
             level, text = len(heading[1]), heading[2]
             if level == 1 and not first_title_skipped:
                 first_title_skipped = True
-                doc.add_paragraph(text, style='Subtitle' if 'Subtitle' in doc.styles else 'Normal')
+                if not include_toc:
+                    doc.add_paragraph(text, style='Subtitle' if 'Subtitle' in doc.styles else 'Normal')
                 continue
             heading_pattern = r"[^\w\s.]" if preserve_heading_numbers else r"[^\w\s]"
-            doc.add_paragraph(re.sub(heading_pattern, " ", text).strip(), style=f"Heading {min(max(level - 1, 1), 3)}")
+            paragraph = doc.add_paragraph(re.sub(heading_pattern, " ", text).strip(), style=f"Heading {min(max(level - 1, 1), 3)}")
+            if include_toc:
+                if heading_number == 0:
+                    paragraph.paragraph_format.page_break_before = True
+                heading_number += 1
+                bookmark = OxmlElement('w:bookmarkStart'); bookmark.set(qn('w:id'), str(heading_number)); bookmark.set(qn('w:name'), f'srs_{heading_number}')
+                finish = OxmlElement('w:bookmarkEnd'); finish.set(qn('w:id'), str(heading_number))
+                paragraph._p.insert(1 if paragraph._p.pPr is not None else 0, bookmark); paragraph._p.append(finish)
             continue
         if line.startswith("|") and index < len(lines) and re.match(r"^\|[\s:|\-]+\|\s*$", lines[index]):
             rows = [[c.strip() for c in line.strip().strip("|").split("|")]]

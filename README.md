@@ -74,4 +74,8 @@ Uploads must be `.docx` files up to 8 MiB. Images and diagrams are not interpret
 
 Generated files and logs stay under `outputs/`. Runtime logs are in `outputs/local-runtime/runtime.log`. Downloads require the authenticated session that generated them.
 
+The header includes a light/dark toggle. It follows the system preference initially and remembers a manual choice in the browser.
+
+After 19 minutes without human activity, the site shows a warning with **Stay signed in**. At 20 minutes it ends the session and returns to the public home page. Keyboard, pointer, touch and input activity renew the server clock; background polling does not. The latest saved project, uploaded document, draft and report links are stored privately by account and restored after login. A report already running can finish and be recovered after signing back in, provided the local server process remains running. Refresh the workspace after it finishes. Only the latest workspace is restored; this is not a versioned project archive.
+
 The laptop must remain on and awake. Optional Windows login startup is available through `Enable-Local-Autostart.ps1`. The launcher exposes loopback addresses only; this is not a public hosting setup.
